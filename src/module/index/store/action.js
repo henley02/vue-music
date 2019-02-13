@@ -1,6 +1,7 @@
 import * as types from './mutation-type';
 import { playMode } from 'index/js/config.js';
 import { shuffle } from 'index/js/util.js';
+import { saveSearch, deleteSearch, clearSearch } from 'index/js/cache.js'
 
 function findIndex(list, song) {
   return list.findIndex(item => item.id === song.id);
@@ -72,6 +73,28 @@ export const insertSong = function ({ commit, state }, song) {
   commit(types.SET_PLAYING_STATE, true);
 }
 
+/**
+ * 添加一个搜索历史
+ * @param commit
+ * @param query
+ */
 export const saveSearchHistory = function ({ commit }, query) {
-  
+  commit(types.SET_SEARCH_HISTORY, saveSearch(query));
+}
+
+/**
+ * 删除一个搜索历史
+ * @param commit
+ * @param query
+ */
+export const deleteSearchHistory = function ({ commit }, query) {
+  commit(types.SET_SEARCH_HISTORY, deleteSearch(query));
+}
+
+/**
+ * 清空所有的历史记录
+ * @param commit
+ */
+export const clearSearchHistory = function ({ commit }) {
+  commit(types.SET_SEARCH_HISTORY, clearSearch());
 }

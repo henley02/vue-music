@@ -65,6 +65,9 @@
       };
     },
     methods: {
+      refresh() {
+        this.$refs.suggest.refresh();
+      },
       listScroll() {
         this.$emit('listScroll');
       },
@@ -76,7 +79,7 @@
         } else {
           this.insertSong(item);
         }
-        this.$emit('select', item);
+        this.$emit('select');
       },
       searchMore() { // 下拉加载更多的数据
         if (!this.hasMore) {
@@ -129,8 +132,6 @@
           let songList = await processSongUrl(this._normalizeSong(data.song.list));
           ret = ret.concat(songList);
         }
-        console.log('-----');
-        console.log(ret);
         return ret;
       },
       /**
