@@ -28,7 +28,6 @@
        * @param playList
        */
       handlePlayList(playList) {
-        console.log(playList.length);
         const bottom = playList.length > 0 ? '60px' : '';
         this.$refs.singer.style.bottom = bottom;
         this.$refs.list.refresh();

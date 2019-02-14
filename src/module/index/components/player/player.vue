@@ -82,17 +82,14 @@
             <i @click.stop="togglePlaying()" :class="miniIcon" class="icon-mini"></i>
           </progress-circle>
         </div>
-        <div class="control">
+        <div class="control" @click.stop="showPlayList()">
           <i class="icon-playlist"></i>
         </div>
       </div>
     </transition>
-    <audio :src="currentSong.url" ref="audio"
-           @canplay="ready"
-           @error="error"
-           @timeupdate="timeUpdate"
-           @ended="end"
-    ></audio>
+    <play-list ref="playList"></play-list>
+    <audio :src="currentSong.url" ref="audio" @canplay="ready" @error="error" @timeupdate="timeUpdate"
+           @ended="end"></audio>
   </div>
 </template>
 <script type="text/ecmascript-6">
@@ -106,6 +103,7 @@
   import Slider from 'index/components/slider/slider.vue';
   import { shuffle } from 'index/js/util.js';
   import lyricParser from 'lyric-parser';
+  import PlayList from "../play-list/play-list.vue";
 
   const transform = prefixStyle('transform');
   const transitionDuration = prefixStyle('transitionDuration');
@@ -166,11 +164,17 @@
         });
       },
       currentSong(newVal, oldVal) {
+        if (!newVal.id) {
+          return;
+        }
         if (newVal.id === oldVal.id) {
           return;
         }
         if (this.currentLyric) {
           this.currentLyric.stop();
+          this.currentTime = 0;
+          this.playingLyric = '';
+          this.currentLineNum = 0;
         }
         setTimeout(() => {
           this.$refs.audio.play();
@@ -179,6 +183,9 @@
       }
     },
     methods: {
+      showPlayList() {
+        this.$refs.playList.show();
+      },
       middleTouchStart(e) {
         this.touch.initiated = true;
         const touches = e.touches[0];
@@ -436,6 +443,7 @@
       this.touch = {}
     },
     components: {
+      PlayList,
       ProcessBar,
       ProgressCircle,
       Scroll,
