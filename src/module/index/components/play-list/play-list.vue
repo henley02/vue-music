@@ -4,14 +4,14 @@
       <div class="list-wrapper" @click.stop>
         <div class="list-header">
           <h1 class="title">
-            <i class="icon"></i>
-            <span class="text"></span>
-            <span class="clear"><i class="icon-clear"></i></span>
+            <i class="icon" :class="iconMode" @click="changeMode"></i>
+            <span class="text">{{modeText}}</span>
+            <span class="clear" @click="showConfirm()"><i class="icon-clear"></i></span>
           </h1>
         </div>
         <scroll ref="listContent" :data="sequenceList" class="list-content" :refreshDelay="refreshDelay">
           <transition-group ref="list" name="list" tag="ul">
-            <li ref="listItem" class="item" v-for="(item,index) in sequenceList" :key="index"
+            <li ref="listItem" class="item" v-for="(item,index) in sequenceList" :key="item.id"
                 @click="selectItem(item,index)">
               <i class="current" :class="getCurrentIcon(item)"></i>
               <span class="text">{{item.name}}</span>
@@ -25,7 +25,7 @@
           </transition-group>
         </scroll>
         <div class="list-operate">
-          <div class="add">
+          <div class="add" @click="showAddSong()">
             <i class="icon-add"></i>
             <span class="text">添加到歌曲列表</span>
           </div>
@@ -35,17 +35,22 @@
         </div>
       </div>
       <confirm ref="confirm" @confirm="confirmClear" text="是否清空播放列表" confirmBtnText="清空"></confirm>
+      <add-song ref="addSong"></add-song>
     </div>
   </transition>
 </template>
 <script type="text/ecmascript-6">
   import Scroll from "../scroll/scroll.vue";
   import Confirm from "../confirm/confirm.vue";
-  import { mapGetters, mapMutations, mapActions } from 'vuex';
+  import { mapActions } from 'vuex';
   import { playMode } from 'index/js/config.js';
+  import { playerMixin } from 'index/js/mixin.js';
+  import AddSong from "../add-song/add-song.vue";
 
   export default {
+    mixins: [playerMixin],
     components: {
+      AddSong,
       Confirm,
       Scroll
     },
@@ -57,12 +62,9 @@
       };
     },
     computed: {
-      ...mapGetters([
-        'mode',
-        'sequenceList',
-        'currentSong',
-        'playList'
-      ])
+      modeText() {
+        return this.mode === playMode.sequence ? '顺序播放' : this.mode === playMode.random ? '随机播放' : '单曲循环'
+      }
     },
     watch: {
       currentSong(newVal, oldVal) {
@@ -75,6 +77,16 @@
       }
     },
     methods: {
+      showAddSong() {
+        this.$refs.addSong.show();
+      },
+      confirmClear() {
+        this.deleteSongList();
+        this.hide();
+      },
+      showConfirm() {
+        this.$refs.confirm.show();
+      },
       deleteOne(item) {
         this.deleteSong(item);
         if (!this.playList.length) {
@@ -115,14 +127,9 @@
       hide() {
         this.showFlag = false;
       },
-      confirmClear() {
-      },
-      ...mapMutations({
-        setCurrentIndex: 'SET_CURRENT_INDEX',
-        setPlayingState: 'SET_PLAYING_STATE'
-      }),
       ...mapActions([
-        'deleteSong'
+        'deleteSong',
+        'deleteSongList'
       ])
     },
     created() {
@@ -186,7 +193,7 @@
           padding: 0 30px 0 20px
           overflow: hidden
           &.list-enter-active, &.list-leave-active
-            transition: all 0.1s
+            transition: all 0.1s linear
           &.list-enter, &.list-leave-to
             height: 0
           .current

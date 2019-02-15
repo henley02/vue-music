@@ -1,7 +1,7 @@
 import * as types from './mutation-type';
 import { playMode } from 'index/js/config.js';
 import { shuffle } from 'index/js/util.js';
-import { saveSearch, deleteSearch, clearSearch } from 'index/js/cache.js'
+import { saveSearch, deleteSearch, clearSearch, savePlay } from 'index/js/cache.js'
 
 function findIndex(list, song) {
   return list.findIndex(item => item.id === song.id);
@@ -99,11 +99,19 @@ export const deleteSong = function ({ commit, state }, song) {
   commit(types.SET_PLAYLIST, playList);
   commit(types.SET_SEQUENCE_LIST, sequenceList);
   commit(types.SET_CURRENT_INDEX, currentIndex);
-  if (!playList.length) {
-    commit(types.SET_PLAYING_STATE, false);
-  } else {
-    commit(types.SET_PLAYING_STATE, true);
-  }
+  const playingState = playList.length > 0;
+  commit(types.SET_PLAYING_STATE, playingState);
+}
+
+/**
+ * 清空播放列表
+ * @param commit
+ */
+export const deleteSongList = function ({ commit }) {
+  commit(types.SET_PLAYLIST, []);
+  commit(types.SET_SEQUENCE_LIST, []);
+  commit(types.SET_CURRENT_INDEX, -1);
+  commit(types.SET_PLAYING_STATE, false);
 }
 
 /**
@@ -125,9 +133,18 @@ export const deleteSearchHistory = function ({ commit }, query) {
 }
 
 /**
- * 清空所有的历史记录
+ * 清空所有的搜索记录
  * @param commit
  */
 export const clearSearchHistory = function ({ commit }) {
   commit(types.SET_SEARCH_HISTORY, clearSearch());
+}
+
+/**
+ * 保存播放记录
+ * @param commit
+ * @param song
+ */
+export const savePlayHistory = function ({ commit }, song) {
+  commit(types.SET_PLAY_HISTORY, savePlay(song));
 }

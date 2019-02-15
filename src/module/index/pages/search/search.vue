@@ -4,7 +4,7 @@
       <search-box ref="searchBox" @keyword="onKeywordChange"></search-box>
     </div>
     <div class="shortcut-wrapper" v-show="!keyword" ref="shortcutWrapper">
-      <scroll class="shortcut" ref="shortcut" :data="shortcut">
+      <scroll class="shortcut" ref="shortcut" :data="shortcut" :refreshDelay="refreshDelay">
         <div>
           <div class="hot-key">
             <h1 class="title">热门搜索</h1>
@@ -35,8 +35,8 @@
 <script type="text/ecmascript-6">
   import { getHotKey } from 'index/api/search.js';
   import { ERR_OK } from "index/api/config";
-  import { playListMixin } from 'index/js/mixin.js';
-  import { mapActions, mapGetters } from 'vuex';
+  import { playListMixin, searchMixin } from 'index/js/mixin.js';
+  import { mapActions } from 'vuex';
   import Suggest from "index/components/suggest/suggest.vue";
   import SearchBox from "index/components/search-box/search-box.vue";
   import SearchList from "index/components/search-list/search-list.vue";
@@ -54,8 +54,7 @@
     name: 'search',
     data() {
       return {
-        keyword: '',
-        hotkey: [],
+        hotkey: []
       };
     },
     watch: {
@@ -67,12 +66,11 @@
         }
       }
     },
-    mixins: [playListMixin],
+    mixins: [playListMixin, searchMixin],
     computed: {
       shortcut() {
         return this.hotkey.concat(this.searchHistory);
-      },
-      ...mapGetters(['searchHistory'])
+      }
     },
     methods: {
       /**
@@ -90,25 +88,15 @@
       showConfirm() {
         this.$refs.confirm.show();
       },
-      saveSearch() {
-        this.saveSearchHistory(this.keyword);
-      },
-      blurInput() {
-        this.$refs.searchBox.blur();
-      },
-      onKeywordChange(val) {
-        this.keyword = val;
-      },
-      changeKeyword(item) {
-        this.$refs.searchBox.setKeyword(item);
-      },
       async _getHotKey() {
         let res = await getHotKey();
         if (res.code === ERR_OK) {
           this.hotkey = res.data.hotkey.splice(0, 10);
         }
       },
-      ...mapActions(['saveSearchHistory', 'deleteSearchHistory', 'clearSearchHistory'])
+      ...mapActions([
+        'clearSearchHistory'
+      ])
     },
     created() {
       this._getHotKey();

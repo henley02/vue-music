@@ -93,7 +93,7 @@
   </div>
 </template>
 <script type="text/ecmascript-6">
-  import { mapGetters, mapMutations } from 'vuex';
+  import { mapGetters, mapMutations, mapActions } from 'vuex';
   import { playMode } from 'index/js/config.js';
   import createKeyframeAnimation from 'create-keyframe-animation';
   import { prefixStyle } from 'public/js/dom.js';
@@ -101,14 +101,16 @@
   import ProgressCircle from './../progress-circle/progress-circle.vue';
   import Scroll from 'index/components/scroll/scroll.vue';
   import Slider from 'index/components/slider/slider.vue';
-  import { shuffle } from 'index/js/util.js';
+
   import lyricParser from 'lyric-parser';
   import PlayList from "../play-list/play-list.vue";
+  import { playerMixin } from 'index/js/mixin.js';
 
   const transform = prefixStyle('transform');
   const transitionDuration = prefixStyle('transitionDuration');
   export default {
     name: 'player',
+    mixins: [playerMixin],
     data() {
       return {
         songReady: false,
@@ -135,25 +137,10 @@
       percent() {
         return this.currentTime / this.currentSong.duration;
       },
-      iconMode() {
-        let str = '';
-        if (this.mode === playMode.sequence) {
-          str = 'icon-sequence';
-        } else if (this.mode === playMode.loop) {
-          str = 'icon-loop';
-        } else {
-          str = 'icon-random';
-        }
-        return str;
-      },
       ...mapGetters([
         'fullScreen',
-        'playList',
-        'currentSong',
         'playing',
-        'currentIndex',
-        'mode',
-        'sequenceList'
+        'currentIndex'
       ])
     },
     watch: {
@@ -369,6 +356,7 @@
       },
       ready() {
         this.songReady = true;
+        this.savePlayHistory(this.currentSong);
       },
       end() {
         if (this.mode === playMode.loop) {
@@ -393,23 +381,6 @@
           this.currentLyric.seek(currentTime * 1000);
         }
       },
-      changeMode() {
-        const mode = ( this.mode + 1) % 3;
-        this.setPlayMode(mode);
-        let list = null;
-        if (mode === playMode.random) {
-          list = shuffle(this.sequenceList);
-        } else {
-          list = this.sequenceList;
-        }
-        console.log(list);
-        this.resetCurrentIndex(list);
-        this.setPlayList(list);
-      },
-      resetCurrentIndex(list) {
-        let index = list.findIndex((item) => item.id === this.currentSong.id);
-        this.setCurrentIndex(index);
-      },
       _pad(num, n = 2) {
         let len = num.toString().length;
         while (len < n) {
@@ -432,12 +403,11 @@
         };
       },
       ...mapMutations({
-        setFullScreen: 'SET_FULL_SCREEN',
-        setPlayingState: 'SET_PLAYING_STATE',
-        setCurrentIndex: 'SET_CURRENT_INDEX',
-        setPlayMode: 'SET_PLAY_MODE',
-        setPlayList: 'SET_PLAYLIST'
-      })
+        setFullScreen: 'SET_FULL_SCREEN'
+      }),
+      ...mapActions([
+        'savePlayHistory'
+      ])
     },
     created() {
       this.touch = {}
