@@ -10,6 +10,9 @@ export default new Router({
     {
       path: '/',
       name: 'Home',
+      meta: {
+        isShow: false
+      },
       redirect: '/recommend'
     },
     {
@@ -75,6 +78,16 @@ export default new Router({
       },
       component(resolve) {
         require(['./../pages/search/search.vue'], resolve);
+      }
+    },
+    {
+      path: '/user',
+      name: 'User',
+      meta: {
+        isShow: false
+      },
+      component(resolve) {
+        require(['./../pages/user-center/user-center.vue'], resolve);
       }
     }
   ]

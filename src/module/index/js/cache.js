@@ -6,6 +6,8 @@ const SEARCH_MAX_LENGTH = 15;
 const PLAY_KEY = '__play__';
 const PLAY_MAX_LENGTH = 200;
 
+const FAVORITE_KEY = '__favorite__';
+const FAVORITE_MAX_LENGTH = 200;
 
 /**
  * 从数组中删除
@@ -104,4 +106,37 @@ export function savePlay(song) {
  */
 export function loadPlay() {
   return storage.get(PLAY_KEY, []);
+}
+
+/*--------收藏歌曲------------*/
+/**
+ * 收藏歌曲
+ * @param song
+ * @returns {*}
+ */
+export function saveFavorite(song) {
+  let songs = storage.get(FAVORITE_KEY, []);
+  insertArray(songs, song, (item) => {
+    return song.id === item.id;
+  }, FAVORITE_MAX_LENGTH);
+  storage.set(FAVORITE_KEY, songs);
+  return songs;
+}
+
+export function loadFavorite() {
+  return storage.get(FAVORITE_KEY, []);
+}
+
+/**
+ * 取消收藏的歌曲
+ * @param query
+ * @returns {*}
+ */
+export function deleteFavorite(song) {
+  let songs = storage.get(FAVORITE_KEY, []);
+  deleteFromArray(songs, (item) => {
+    return item.id === song.id;
+  });
+  storage.set(FAVORITE_KEY, songs);
+  return songs;
 }

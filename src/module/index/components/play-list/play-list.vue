@@ -114,9 +114,6 @@
         });
         this.$refs.listContent.scrollToElement(this.$refs.listItem[index], 300);
       },
-      getFavoriteIcon(item) {
-        return ''
-      },
       show() {
         this.showFlag = true;
         setTimeout(() => {

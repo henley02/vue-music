@@ -15,7 +15,7 @@
       };
     },
     created() {
-      this.tabList = this.$router.options.routes.filter(item => item.name !== 'Home');
+      this.tabList = this.$router.options.routes.filter(item => !item.isShow);
     }
   };
 </script>
