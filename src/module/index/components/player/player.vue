@@ -88,7 +88,7 @@
       </div>
     </transition>
     <play-list ref="playList"></play-list>
-    <audio :src="currentSong.url" ref="audio" @canplay="ready" @error="error" @timeupdate="timeUpdate"
+    <audio :src="currentSong.url" ref="audio" @play="ready" @error="error" @timeupdate="timeUpdate"
            @ended="end"></audio>
   </div>
 </template>
@@ -118,7 +118,8 @@
         currentLyric: null,
         currentLineNum: 0,
         currentShow: 'cd',
-        playingLyric: ''
+        playingLyric: '',
+        timer: null
       };
     },
     computed: {
@@ -163,7 +164,8 @@
           this.playingLyric = '';
           this.currentLineNum = 0;
         }
-        setTimeout(() => {
+        clearTimeout(this.timer);
+        this.timer = setTimeout(() => {
           this.$refs.audio.play();
           this.getLyric();
         }, 1000);
@@ -230,7 +232,11 @@
       async getLyric() {
         try {
           await this.currentSong.getLyric();
-          this.currentLyric = new lyricParser(this.currentSong.lyric, this.handleLyric);
+          let lyric = new lyricParser(this.currentSong.lyric, this.handleLyric);
+          if (this.currentSong.lyric !== lyric) {
+            return;
+          }
+          this.currentLyric = lyric;
           if (this.playing) {
             this.currentLyric.play();
           }
@@ -311,6 +317,7 @@
         }
         if (this.playList.length == 1) {
           this.loop();
+          return;
         } else {
           let index = this.currentIndex - 1;
           if (index === -1) {
@@ -329,6 +336,7 @@
         }
         if (this.playList.length == 1) {
           this.loop();
+          return;
         } else {
           let index = this.currentIndex + 1;
           if (index === this.playList.length) {
